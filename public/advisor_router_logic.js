@@ -1,3 +1,17 @@
+// public/advisor_router_logic.js
+
+// Profile info (OPTIONAL: You can pass more detail in the backend if you want)
+const advisorProfiles = {
+  Sundar: "Sundar Pichai, CEO of Google - expert in AI, scale, data infrastructure, product development",
+  Pamela: "Pamela Maynard, former EY Global VP - expert in enterprise transformation, consulting, operations",
+  Arvind: "Arvind Krishna, IBM CEO - expert in cloud, cybersecurity, hybrid infrastructure",
+  Tope: "Tope Awotona, Calendly founder - expert in SaaS, bootstrapping, product-led growth",
+  Ime: "Ime Archibong, former Facebook VP - expert in partnerships, community, platform growth",
+  Lisa: "Lisa Gelobter, tech executive - expert in DEI, product design, gov-tech",
+  Kimberly: "Kimberly Bryant, Black Girls CODE founder - expert in STEM equity, team leadership, early-stage tech",
+  Jensen: "Jensen Huang, NVIDIA CEO - expert in GPU, compute, AI infrastructure"
+};
+
 async function runBoardRoomFlow() {
   const question = document.getElementById("questionInput").value.trim();
   const outputArea = document.getElementById("outputArea");
@@ -9,132 +23,59 @@ async function runBoardRoomFlow() {
 
   outputArea.innerHTML = "<p>Routing your question to the Board...</p>";
 
-  // Advisor profile context
-  const advisorProfiles = {
-    "Sundar": "Sundar Pichai, CEO of Google - expert in AI, scale, data infrastructure, product development.",
-    "Pamela": "Pamela Maynard, former EY Global VP - expert in enterprise transformation, consulting, operations.",
-    "Arvind": "Arvind Krishna, IBM CEO - expert in cloud, cybersecurity, hybrid infrastructure.",
-    "Tope": "Tope Awotona, Calendly founder - expert in SaaS, bootstrapping, product-led growth.",
-    "Ime": "Ime Archibong, former Facebook VP - expert in partnerships, community, platform growth.",
-    "Lisa": "Lisa Gelobter, tech executive - expert in DEI, product design, gov-tech.",
-    "Kimberly": "Kimberly Bryant, Black Girls CODE founder - expert in STEM equity, team leadership, early-stage tech.",
-    "Jensen": "Jensen Huang, NVIDIA CEO - expert in GPU, compute, AI infrastructure."
-  };
-
   try {
-    // 1. Route to advisor selector
-    const routerResponse = await fetch("https://api.openai.com/v1/chat/completions", {
+    // 1. ROUTER FUNCTION: Ask Netlify function for which advisors to consult
+    const routerResponse = await fetch("/.netlify/functions/askBoard", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer YOUR_OPENAI_API_KEY_HERE`
-      },
-      body: JSON.stringify({
-        model: "gpt-4",
-        messages: [
-          {
-            role: "system",
-            content: "You are the Advisor Router for The Board Room app. Based on this user question, return a JSON array of the most relevant advisors to consult. Choose 3–5 advisors from: Sundar, Pamela, Arvind, Tope, Ime, Lisa, Kimberly, Jensen."
-          },
-          { role: "user", content: question }
-        ],
-        temperature: 0.3
-      })
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ type: "router", question })
     });
-
     const routerResult = await routerResponse.json();
-console.log("Raw router response:", routerResult.choices[0].message.content);
+    const advisorNames = routerResult.names; // Should be ["Sundar", "Pamela", ...]
 
-let advisorNames;
-try {
-  advisorNames = JSON.parse(routerResult.choices[0].message.content);
-  // Fix: If array of objects, extract advisor names
-  if (advisorNames.length && typeof advisorNames[0] === "object" && advisorNames[0] !== null && advisorNames[0].advisor) {
-    advisorNames = advisorNames.map(obj => obj.advisor);
-  }
-  console.log("Normalized advisor names:", advisorNames);
-} catch (err) {
-  outputArea.innerHTML = "<p>Error: The router response is not a valid JSON array of advisor names. Raw: <br><pre>" + routerResult.choices[0].message.content + "</pre></p>";
-  return;
-}
-
-
-    // 2. Get advisor responses (use profiles for better context)
+    // 2. ADVISOR RESPONSES: Ask each advisor via Netlify function
     const advisors = await Promise.all(
       advisorNames.map(async (name) => {
-        const profile = advisorProfiles[name] || name;
-        const res = await fetch("https://api.openai.com/v1/chat/completions", {
+        const res = await fetch("/.netlify/functions/askBoard", {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization": `Bearer YOUR_OPENAI_API_KEY_HERE`
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            model: "gpt-4",
-            messages: [
-              {
-                role: "system",
-                content: `You are ${profile} Respond clearly and insightfully to the user's question as if you are consulting for Cheryl Tibbs.`
-              },
-              { role: "user", content: question }
-            ],
-            temperature: 0.5
+            type: "advisor",
+            name,
+            question,
+            profile: advisorProfiles[name] // Optional: backend can ignore if not used
           })
         });
-
         const result = await res.json();
-        let resp = result.choices?.[0]?.message?.content;
-        if (typeof resp !== "string") {
-          resp = JSON.stringify(resp, null, 2);
-        }
-        return { name, response: resp };
+        return {
+          name,
+          response: result.response // Should be advisor's string response
+        };
       })
     );
 
-    // 3. Chief of Staff summary
-    const chiefRes = await fetch("https://api.openai.com/v1/chat/completions", {
+    // 3. CHIEF OF STAFF: Ask for synthesis
+    const chiefRes = await fetch("/.netlify/functions/askBoard", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer YOUR_OPENAI_API_KEY_HERE`
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        model: "gpt-4",
-        messages: [
-          {
-            role: "system",
-            content: `You are the Chief of Staff. Given the following advisor responses, reply ONLY in this exact JSON format:
-
-{
-  "summary": "...",
-  "recommendation": "...",
-  "confidence": 85,
-  "risk": "Low"
-}
-
-Do not include any explanation or formatting. Just return the JSON. Here are the advisor responses:`
-          },
-          {
-            role: "user",
-            content: advisors.map(a => `${a.name}: ${a.response.replace(/\n/g, ' ')}`).join(" || ")
-          }
-        ],
-        temperature: 0.4
+        type: "chief",
+        advisors, // [{ name, response }, ...]
+        question
       })
     });
-
     const chief = await chiefRes.json();
-    let synthesis;
-    try {
-      synthesis = JSON.parse(chief.choices[0].message.content);
-    } catch (e) {
-      synthesis = { summary: "No summary", recommendation: "", confidence: "N/A", risk: "N/A" };
-    }
+    const synthesis = chief.summary; // Should be { summary, recommendation, confidence, risk }
 
-    // 4. Output formatting
+    // 4. OUTPUT to UI
     let html = "<h3>Advisor Responses:</h3>";
     advisors.forEach((a) => {
-      html += `<div class="advisor-card"><strong>${a.name}</strong><br/>${a.response}</div>`;
+      html += `
+        <div class="advisor-card">
+          <strong>${a.name}</strong><br/>
+          ${a.response}
+        </div>
+      `;
     });
 
     html += `
