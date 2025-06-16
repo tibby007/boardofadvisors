@@ -1,0 +1,53 @@
+.advisor-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 22px 24px;
+    margin-bottom: 32px;
+    box-shadow: 0 2px 14px 0 rgba(0,0,0,0.07);
+    font-size: 1.08rem;
+    line-height: 1.68;
+    color: #24292f;
+    max-width: 760px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  .advisor-card strong {
+    font-size: 1.12rem;
+    font-weight: 700;
+    color: #101f54;
+    display: block;
+    margin-bottom: 8px;
+  }
+  
+  .advisor-card p {
+    margin-top: 0.7em;
+    margin-bottom: 0.7em;
+  }
+  
+  .advisor-card ul, .advisor-card ol {
+    margin-top: 0.6em;
+    margin-bottom: 0.6em;
+    padding-left: 1.6em;
+  }
+  
+  .chief-summary {
+    background: #f5f7ff;
+    border-radius: 14px;
+    padding: 30px 34px;
+    margin-bottom: 50px;
+    box-shadow: 0 2px 14px 0 rgba(0,0,0,0.08);
+    font-size: 1.11rem;
+    line-height: 1.62;
+    color: #151d35;
+    max-width: 780px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  @media (max-width: 600px) {
+    .advisor-card, .chief-summary {
+      padding: 12px 8px;
+    }
+  }
+  
