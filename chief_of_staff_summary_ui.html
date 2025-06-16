@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Board Room - Chief of Staff Summary</title>
+    <style>
+        :root {
+            --primary-color: #233E7E;
+            --accent-color: #4A6CF7;
+            --bg-color: #F8F9FC;
+            --line-color: #E4E6EF;
+            --text-color: #333333;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --hover-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
+            --card-radius: 12px;
+            --button-radius: 6px;
+            --success-bg: #E6F4EA;
+            --success-color: #1E8E3E;
+            --warning-bg: #FFF6E5;
+            --warning-color: #F9AB00;
+            --error-bg: #FBEAEA;
+            --error-color: #D93025;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+        }
+
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .back-button {
+            display: flex;
+            align-items: center;
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .back-button svg {
+            margin-right: 0.5rem;
+        }
+
+        h1 {
+            font-size: 2rem;
+            color: var(--primary-color);
+            margin: 0 0 1rem 0;
+        }
+
+        .question-display {
+            background-color: white;
+            border-radius: var(--card-radius);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+        }
+
+        .question-text {
+            font-size: 1.2rem;
+            font-weight: 500;
+            margin: 0;
+        }
+
+        .progress-bar {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+            position: relative;
+        }
+
+        .progress-bar::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background-color: var(--line-color);
+            z-index: 1;
+        }
+
+        .progress-step {
+            width: 2rem;
+            height: 2rem;
+            border-radius: 50%;
+            background-color: white;
+            border: 2px solid var(--line-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            position: relative;
+            z-index: 2;
+        }
+
+        .progress-step.active {
+            background-color: var(--accent-color);
+            border-color: var(--accent-color);
+            color: white;
+        }
+
+        .progress-step.completed {
+            background-color: var(--success-color);
+            border-color: var(--success-color);
+            color: white;
+        }
+
+        .summary-card {
+            background-color: white;
+            border-radius: var(--card-radius);
+            box-shadow: var(--shadow);
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .summary-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .section-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--primary-color);
+            margin: 0 0 1rem 0;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--line-color);
+        }
+
+        .key-insights {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .key-insights li {
+            position: relative;
+            padding-left: 1.5rem;
+            margin-bottom: 0.75rem;
+            line-height: 1.5;
+        }
+
+        .key-insights li::before {
+            content: '•';
+            position: absolute;
+            left: 0;
+            color: var(--accent-color);
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .recommendation {
+            font-size: 1.2rem;
+            line-height: 1.6;
+            font-weight: 600;
+            color: var(--primary-color);
+            margin: 0;
+        }
+
+        .metrics {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .metric {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .metric-label {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 0.5rem;
+        }
+
+        .confidence-meter {
+            height: 8px;
+            background-color: var(--line-color);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 0.5rem;
+        }
+
+        .confidence-fill {
+            height: 100%;
+            background-color: var(--success-color);
+            border-radius: 4px;
+        }
+
+        .confidence-fill.medium {
+            background-color: var(--warning-color);
+        }
+
+        .confidence-fill.low {
+            background-color: var(--error-color);
+        }
+
+        .confidence-value {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .risk-tag {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .risk-tag.low {
+            background-color: var(--success-bg);
+            color: var(--success-color);
+        }
+
+        .risk-tag.moderate {
+            background-color: var(--warning-bg);
+            color: var(--warning-color);
+        }
+
+        .risk-tag.high {
+            background-color: var(--error-bg);
+            color: var(--error-color);
+        }
+
+        .advisors-list {
+            margin-top: 1rem;
+        }
+
+        .advisor-chip {
+            display: inline-flex;
+            align-items: center;
+            background-color: var(--bg-color);
+            border-radius: 1rem;
+            padding: 0.25rem 0.75rem;
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .advisor-chip img {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            margin-right: 0.5rem;
+        }
+
+        .actions {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 2rem;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .button {
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--button-radius);
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            display: flex;
+            align-items: center;
+        }
+
+        .button svg {
+            margin-right: 0.5rem;
+        }
+
+        .primary-button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+        }
+
+        .primary-button:hover {
+            background-color: #1a2f5f;
+        }
+
+        .secondary-button {
+            background-color: transparent;
+            color: var(--accent-color);
+            border: 1px solid var(--accent-color);
+        }
+
+        .secondary-button:hover {
+            background-color: rgba(74, 108, 247, 0.08);
+        }
+
+        .loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(74, 108, 247, 0.2);
+            border-radius: 50%;
+            border-top-color: var(--accent-color);
+            animation: spin 1s linear infinite;
+            margin-bottom: 1rem;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .error-message {
+            background-color: var(--error-bg);
+            color: var(--error-color);
+            padding: 1rem;
+            border-radius: var(--button-radius);
+            margin-bottom: 1rem;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            display: none;
+        }
+
+        .modal {
+            background-color: white;
+            border-radius: var(--card-radius);
+            box-shadow: var(--shadow);
+            width: 90%;
+            max-width: 500px;
+            padding: 2rem;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--primary-color);
+            margin: 0;
+        }
+
+        .close-button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.5rem;
+            color: #666;
+        }
+
+        .modal-body {
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 1rem;
+            border: 1px solid var(--line-color);
+            border-radius: var(--button-radius);
+            font-size: 1rem;
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        /* Responsive styles */
+        @media (max-width: 768px) {
+            .metrics {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .actions {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .action-buttons {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .container {
+                padding: 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .button {
+                width: 100%;
+                justify-content: center;
+                margin-bottom: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <a class="back-button" onclick="navigateBack()">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M19 12H5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M12 19L5 12L12 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Back to Advisors
+            </a>
+        </div>
+
+        <div class="progress-bar">
+            <div class="progress-step completed">1</div>
+            <div class="progress-step completed">2</div>
+            <div class="progress-step active">3</div>
+        </div>
+
+        <h1>Chief of Staff Synthesis</h1>
+        
+        <div class="question-display">
+            <p class="question-text" id="question-text">Loading question...</p>
+        </div>
+
+        <div id="loading-container" class="loading">
+            <div class="spinner"></div>
+            <p>Synthesizing advisor insights...</p>
+        </div>
+
+        <div id="error-container" style="display: none;">
+            <div class="error-message">
+                An error occurred while processing your request. Please try again.
+            </div>
+            <button class="button primary-button" onclick="navigateBack()">Back to Advisors</button>
+        </div>
+
+        <div id="summary-container" style="display: none;">
+            <div class="summary-card">
+                <div class="summary-section">
+                    <h3 class="section-title">Key Insights</h3>
+                    <ul class="key-insights" id="key-insights-list">
+                        <!-- Key insights will be dynamically inserted here -->
+                    </ul>
+                </div>
+
+                <div class="summary-section">
+                    <h3 class="section-title">Final Recommendation</h3>
+                    <p class="recommendation" id="recommendation-text">Loading recommendation...</p>
+                </div>
+
+                <div class="metrics">
+                    <div class="metric">
+                        <div class="metric-label">Confidence Score</div>
+                        <div class="confidence-meter">
+                            <div class="confidence-fill" id="confidence-fill"></div>
+                        </div>
+                        <div class="confidence-value" id="confidence-value">0%</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-label">Risk Level</div>
+                        <div id="risk-tag" class="risk-tag">Unknown</div>
+                    </div>
+                </div>
+
+                <div class="summary-section">
+                    <h3 class="section-title">Advisor Panel</h3>
+                    <div class="advisors-list" id="advisors-list">
+                        <!-- Advisor chips will be dynamically inserted here -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="actions">
+                <div class="action-buttons">
+                    <button class="button secondary-button" onclick="navigateToHistory()">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 8V12L15 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M3.05078 11.0001C3.27002 7.58884 5.37187 4.65233 8.44469 3.32278C11.5175 1.99323 15.0372 2.46566 17.6317 4.51973C20.2261 6.5738 21.3602 9.90702 20.6111 13.0868C19.8621 16.2666 17.3516 18.6679 14.1408 19.4005C10.93 20.1331 7.57248 18.9867 5.50493 16.3879C3.43738 13.7891 2.95315 10.2686 4.27078 7.19232" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        Decision History
+                    </button>
+                    <button class="button secondary-button" onclick="exportToPDF()">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M14 3V7C14 7.26522 14.1054 7.51957 14.2929 7.70711C14.4804 7.89464 14.7348 8 15 8H19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M17 21H7C6.46957 21 5.96086 20.7893 5.58579 20.4142C5.21071 20.0391 5 19.5304 5 19V5C5 4.46957 5.21071 3.96086 5.58579 3.58579C5.96086 3.21071 6.46957 3 7 3H14L19 8V19C19 19.5304 18.7893 20.0391 18.4142 20.4142C18.0391 20.7893 17.5304 21 17 21Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M9 15H15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M9 18H12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        Export to PDF
+                    </button>
+                </div>
+                <button class="button primary-button" onclick="openLogDecisionModal()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M9 12L11 14L15 10" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M21 12C21 13.1819 20.7672 14.3522 20.3149 15.4442C19.8626 16.5361 19.1997 17.5282 18.364 18.364C17.5282 19.1997 16.5361 19.8626 15.4442 20.3149C14.3522 20.7672 13.1819 21 12 21C10.8181 21 9.64778 20.7672 8.55585 20.3149C7.46392 19.8626 6.47177 19.1997 5.63604 18.364C4.80031 17.5282 4.13738 16.5361 3.68508 15.4442C3.23279 14.3522 3 13.1819 3 12C3 9.61305 3.94821 7.32387 5.63604 5.63604C7.32387 3.94821 9.61305 3 12 3C14.3869 3 16.6761 3.94821 18.364 5.63604C20.0518 7.32387 21 9.61305 21 12Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    Log Decision
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Log Decision Modal -->
+    <div class="modal-overlay" id="log-decision-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Log Your Decision</h3>
+                <button class="close-button" onclick="closeLogDecisionModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Record what you decided to do based on this recommendation:</p>
+                <textarea id="decision-notes" placeholder="e.g., Implemented the phased rollout approach starting with 30% automation..."></textarea>
+            </div>
+            <div class="modal-footer">
+                <button class="button secondary-button" onclick="closeLogDecisionModal()">Cancel</button>
+                <button class="button primary-button" onclick="saveDecision()">Save Decision</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // State management
+        let boardRoomState = {
+            question: '',
+            selectedAdvisors: [],
+            advisorResponses: [],
+            synthesis: null,
+            loading: true,
+            error: false
+        };
+
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', function() {
+            // In Factory, this would get the state from the previous page
+            // For demo purposes, we'll simulate loading data
+            loadBoardRoomState();
+        });
+
+        // Load state from Factory or localStorage for demo
+        function loadBoardRoomState() {
+            // In Factory, you would access state passed from previous page
+            // For this demo, we'll check if there's data in localStorage or use sample data
+            try {
+                const savedState = localStorage.getItem('boardRoomState');
+                if (savedState) {
+                    boardRoomState = JSON.parse(savedState);
+                    renderPage();
+                } else {
+                    // If no saved state, simulate API call with timeout
+                    setTimeout(function() {
+                        // Sample data for demonstration
+                        boardRoomState = getSampleData();
+                        renderPage();
+                    }, 2000);
+                }
+            } catch (error) {
+                console.error('Error loading state:', error);
+                showError();
+            }
+        }
+
+        // Render the page with current state
+        function renderPage() {
+            // Update question text
+            document.getElementById('question-text').textContent = boardRoomState.question;
+
+            if (boardRoomState.error) {
+                showError();
+                return;
+            }
+
+            if (boardRoomState.loading) {
+                document.getElementById('loading-container').style.display = 'flex';
+                document.getElementById('summary-container').style.display = 'none';
+                return;
+            }
+
+            // Hide loading, show summary
+            document.getElementById('loading-container').style.display = 'none';
+            document.getElementById('summary-container').style.display = 'block';
+
+            // Render synthesis data
+            renderSynthesis();
+        }
+
+        // Render synthesis data
+        function renderSynthesis() {
+            const synthesis = boardRoomState.synthesis;
+            if (!synthesis) {
+                showError();
+                return;
+            }
+
+            // Render key insights
+            const keyInsightsList = document.getElementById('key-insights-list');
+            keyInsightsList.innerHTML = '';
+            
+            if (Array.isArray(synthesis.keyInsights) && synthesis.keyInsights.length > 0) {
+                synthesis.keyInsights.forEach(insight => {
+                    const li = document.createElement('li');
+                    li.textContent = insight;
+                    keyInsightsList.appendChild(li);
+                });
+            } else {
+                // If no key insights array, use summary as fallback
+                const li = document.createElement('li');
+                li.textContent = synthesis.summary;
+                keyInsightsList.appendChild(li);
+            }
+
+            // Render recommendation
+            document.getElementById('recommendation-text').textContent = synthesis.recommendation;
+
+            // Render confidence score
+            const confidenceScore = synthesis.confidenceScore || 0;
+            const confidenceFill = document.getElementById('confidence-fill');
+            confidenceFill.style.width = `${confidenceScore}%`;
+            
+            // Set confidence color based on score
+            if (confidenceScore >= 80) {
+                confidenceFill.className = 'confidence-fill';
+            } else if (confidenceScore >= 50) {
+                confidenceFill.className = 'confidence-fill medium';
+            } else {
+                confidenceFill.className = 'confidence-fill low';
+            }
+            
+            document.getElementById('confidence-value').textContent = `${confidenceScore}%`;
+
+            // Render risk level
+            const riskTag = document.getElementById('risk-tag');
+            const riskLevel = synthesis.riskLevel || 'Unknown';
+            riskTag.textContent = riskLevel;
+            
+            // Set risk tag class based on level
+            if (riskLevel.toLowerCase() === 'low') {
+                riskTag.className = 'risk-tag low';
+            } else if (riskLevel.toLowerCase() === 'moderate' || riskLevel.toLowerCase() === 'medium') {
+                riskTag.className = 'risk-tag moderate';
+            } else if (riskLevel.toLowerCase() === 'high') {
+                riskTag.className = 'risk-tag high';
+            } else {
+                riskTag.className = 'risk-tag';
+            }
+
+            // Render advisor list
+            renderAdvisorList();
+        }
+
+        // Render advisor list as chips
+        function renderAdvisorList() {
+            const advisorsList = document.getElementById('advisors-list');
+            advisorsList.innerHTML = '';
+
+            boardRoomState.selectedAdvisors.forEach(advisorName => {
+                const advisor = boardRoomState.advisorResponses.find(a => a.name === advisorName) || {
+                    name: advisorName,
+                    avatarUrl: null
+                };
+
+                const chip = document.createElement('span');
+                chip.className = 'advisor-chip';
+                
+                // Default avatar if none provided
+                const avatarUrl = advisor.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(advisor.name)}&background=random`;
+                
+                chip.innerHTML = `
+                    <img src="${avatarUrl}" alt="${advisor.name}">
+                    ${advisor.name}
+                `;
+                
+                advisorsList.appendChild(chip);
+            });
+        }
+
+        // Navigation functions
+        function navigateBack() {
+            // In Factory, this would navigate back to the advisor responses page
+            // For demo, just go back in history
+            window.history.back();
+        }
+
+        function navigateToHistory() {
+            // In Factory, this would navigate to the decision history page
+            // For demo, we'll just show an alert
+            alert("Navigating to Decision History page. This feature will be available soon.");
+        }
+
+        // Action functions
+        function exportToPDF() {
+            // In a real app, this would generate and download a PDF
+            alert("Exporting summary to PDF. This feature will be available soon.");
+        }
+
+        function openLogDecisionModal() {
+            document.getElementById('log-decision-modal').style.display = 'flex';
+        }
+
+        function closeLogDecisionModal() {
+            document.getElementById('log-decision-modal').style.display = 'none';
+        }
+
+        function saveDecision() {
+            const decisionNotes = document.getElementById('decision-notes').value;
+            
+            // In Factory, this would save to Supabase
+            // For demo, we'll just show an alert
+            alert(`Decision logged: "${decisionNotes}"`);
+            
+            // Close the modal
+            closeLogDecisionModal();
+        }
+
+        // Error handling
+        function showError() {
+            document.getElementById('loading-container').style.display = 'none';
+            document.getElementById('summary-container').style.display = 'none';
+            document.getElementById('error-container').style.display = 'block';
+        }
+
+        // Sample data generator for demo purposes
+        function getSampleData() {
+            return {
+                question: "Should we launch the Canadian vendor workflow fully automated, or start manual?",
+                loading: false,
+                error: false,
+                selectedAdvisors: ["Sundar Pichai", "Tope Awotona", "Pamela Maynard", "Arvind Krishna"],
+                advisorResponses: [
+                    {
+                        name: "Sundar Pichai",
+                        domain: "Strategy, Scale, Infrastructure",
+                        avatarUrl: "/images/advisors/sundar.png",
+                        response: "I recommend a phased rollout approach. Start with a limited automation pilot (30% of workflows) while maintaining manual oversight.\n\nBuild telemetry from day one - measure latency, error rates, and vendor satisfaction. Set clear KPIs for what 'success' looks like.\n\nOnce metrics show stability (error rates <2%, latency acceptable), expand automation coverage incrementally. This balances innovation speed with operational stability.\n\nThe key is instrumenting everything so you can make data-driven decisions about scaling up."
+                    },
+                    {
+                        name: "Tope Awotona",
+                        domain: "GTM Strategy, SaaS, Product-led Growth",
+                        avatarUrl: "/images/advisors/tope.png",
+                        response: "Launch with a hybrid approach - 70% automated with manual fallbacks.\n\nAs a bootstrapped founder, I learned that perfection is the enemy of progress. Your Canadian vendor workflow doesn't need to be flawless on day one.\n\nStart scrappy, validate core assumptions quickly, and avoid over-engineering. Watch for friction points in vendor onboarding - that's where automation typically breaks.\n\nSet a clear timeline (4-6 weeks) to evaluate and iterate. This keeps costs contained while giving you real-world feedback faster than any testing environment could."
+                    },
+                    {
+                        name: "Pamela Maynard",
+                        domain: "DEI, Culture, Enterprise Ops",
+                        avatarUrl: "/images/advisors/pamela.png",
+                        response: "Consider the change management implications first. Your frontline vendor-ops team needs to feel ownership in this transition.\n\nI recommend pairing your launch with clear communication and inclusive training. Without this, automation can be perceived as 'replacing people' rather than augmenting their capabilities.\n\nA phased approach with team involvement in defining success metrics will drive better adoption. Ensure your workflow accommodates diverse vendor needs and accessibility requirements.\n\nRemember that transformation is as much about people as it is about technology."
+                    },
+                    {
+                        name: "Arvind Krishna",
+                        domain: "Deep Tech, Hybrid Cloud, AI Ethics",
+                        avatarUrl: "/images/advisors/arvind.png",
+                        response: "For Canadian operations, I recommend maintaining manual verification checkpoints until compliance is fully validated.\n\nCanada has provincial data-residency rules and bilingual requirements that vary by region. An automated system must account for these nuances.\n\nImplement a hybrid approach with automated processing but human verification for decisions with regulatory implications. This creates an audit trail while you build confidence in the system.\n\nI suggest running a compliance audit alongside your initial deployment to identify any regulatory gaps before scaling to 100% automation."
+                    }
+                ],
+                synthesis: {
+                    summary: "All advisors support a phased or hybrid approach rather than immediate full automation. There's consensus on the need for real-time metrics and meeting Canadian regulatory standards.",
+                    keyInsights: [
+                        "Start with partial automation (30-70%) with manual oversight",
+                        "Build comprehensive telemetry from day one",
+                        "Address change management and team ownership",
+                        "Account for Canadian provincial regulations and bilingual requirements"
+                    ],
+                    recommendation: "Implement a 3-stage launch: (1) Pilot with 30% automation for 3 weeks, (2) Expand to 70% with regional data segregation for 5 weeks, (3) Move to 95%+ automation after compliance sign-off and sustained KPIs.",
+                    confidenceScore: 87,
+                    riskLevel: "Moderate"
+                }
+            };
+        }
+    </script>
+</body>
+</html>

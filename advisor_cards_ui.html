@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Board Room - Advisor Responses</title>
+    <style>
+        :root {
+            --primary-color: #233E7E;
+            --accent-color: #4A6CF7;
+            --bg-color: #F8F9FC;
+            --line-color: #E4E6EF;
+            --text-color: #333333;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --hover-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
+            --card-radius: 12px;
+            --button-radius: 6px;
+            --success-bg: #E6F4EA;
+            --success-color: #1E8E3E;
+            --warning-bg: #FFF6E5;
+            --warning-color: #F9AB00;
+            --error-bg: #FBEAEA;
+            --error-color: #D93025;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+        }
+
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .back-button {
+            display: flex;
+            align-items: center;
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .back-button svg {
+            margin-right: 0.5rem;
+        }
+
+        h1 {
+            font-size: 2rem;
+            color: var(--primary-color);
+            margin: 0 0 1rem 0;
+        }
+
+        .question-display {
+            background-color: white;
+            border-radius: var(--card-radius);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+        }
+
+        .question-text {
+            font-size: 1.2rem;
+            font-weight: 500;
+            margin: 0;
+        }
+
+        .progress-bar {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+            position: relative;
+        }
+
+        .progress-bar::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background-color: var(--line-color);
+            z-index: 1;
+        }
+
+        .progress-step {
+            width: 2rem;
+            height: 2rem;
+            border-radius: 50%;
+            background-color: white;
+            border: 2px solid var(--line-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            position: relative;
+            z-index: 2;
+        }
+
+        .progress-step.active {
+            background-color: var(--accent-color);
+            border-color: var(--accent-color);
+            color: white;
+        }
+
+        .progress-step.completed {
+            background-color: var(--success-color);
+            border-color: var(--success-color);
+            color: white;
+        }
+
+        .advisor-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .advisor-card {
+            background-color: white;
+            border-radius: var(--card-radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .advisor-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--hover-shadow);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--line-color);
+        }
+
+        .advisor-avatar {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 1rem;
+            border: 2px solid var(--line-color);
+        }
+
+        .advisor-info {
+            flex: 1;
+        }
+
+        .advisor-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin: 0 0 0.25rem 0;
+            color: var(--primary-color);
+        }
+
+        .advisor-domain {
+            font-size: 0.9rem;
+            color: #666;
+            margin: 0;
+        }
+
+        .card-body {
+            padding: 1.5rem;
+        }
+
+        .advisor-response {
+            font-size: 1rem;
+            line-height: 1.6;
+            white-space: pre-line;
+        }
+
+        .card-footer {
+            display: flex;
+            justify-content: flex-end;
+            padding: 1rem 1.5rem;
+            border-top: 1px solid var(--line-color);
+        }
+
+        .card-button {
+            padding: 0.5rem 1rem;
+            border-radius: var(--button-radius);
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            margin-left: 0.5rem;
+        }
+
+        .primary-button {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+        }
+
+        .primary-button:hover {
+            background-color: #3A5CE7;
+        }
+
+        .secondary-button {
+            background-color: transparent;
+            color: var(--accent-color);
+            border: 1px solid var(--accent-color);
+        }
+
+        .secondary-button:hover {
+            background-color: rgba(74, 108, 247, 0.08);
+        }
+
+        .continue-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+
+        .continue-button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.75rem 2rem;
+            border-radius: var(--button-radius);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            transition: background-color 0.2s ease;
+        }
+
+        .continue-button:hover {
+            background-color: #1a2f5f;
+        }
+
+        .continue-button svg {
+            margin-left: 0.5rem;
+        }
+
+        .loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(74, 108, 247, 0.2);
+            border-radius: 50%;
+            border-top-color: var(--accent-color);
+            animation: spin 1s linear infinite;
+            margin-bottom: 1rem;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .error-message {
+            background-color: var(--error-bg);
+            color: var(--error-color);
+            padding: 1rem;
+            border-radius: var(--button-radius);
+            margin-bottom: 1rem;
+        }
+
+        /* Responsive styles */
+        @media (max-width: 768px) {
+            .advisor-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .container {
+                padding: 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .card-footer {
+                flex-direction: column;
+            }
+
+            .card-button {
+                width: 100%;
+                margin: 0.25rem 0;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <a class="back-button" onclick="navigateBack()">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M19 12H5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M12 19L5 12L12 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Back to Question
+            </a>
+        </div>
+
+        <div class="progress-bar">
+            <div class="progress-step completed">1</div>
+            <div class="progress-step active">2</div>
+            <div class="progress-step">3</div>
+        </div>
+
+        <h1>Advisor Panel</h1>
+        
+        <div class="question-display">
+            <p class="question-text" id="question-text">Loading question...</p>
+        </div>
+
+        <div id="loading-container" class="loading">
+            <div class="spinner"></div>
+            <p>The board is deliberating on your question...</p>
+        </div>
+
+        <div id="error-container" style="display: none;">
+            <div class="error-message">
+                An error occurred while processing your request. Please try again.
+            </div>
+            <button class="continue-button" onclick="navigateBack()">Try Again</button>
+        </div>
+
+        <div id="advisors-container" style="display: none;">
+            <div class="advisor-grid" id="advisor-grid">
+                <!-- Advisor cards will be dynamically inserted here -->
+            </div>
+
+            <div class="continue-container">
+                <button class="continue-button" onclick="navigateToSummary()">
+                    View Synthesis
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M5 12H19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M12 5L19 12L12 19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // State management
+        let boardRoomState = {
+            question: '',
+            selectedAdvisors: [],
+            advisorResponses: [],
+            synthesis: null,
+            loading: true,
+            error: false
+        };
+
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', function() {
+            // In Factory, this would get the state from the previous page
+            // For demo purposes, we'll simulate loading data
+            loadBoardRoomState();
+        });
+
+        // Load state from Factory or localStorage for demo
+        function loadBoardRoomState() {
+            // In Factory, you would access state passed from previous page
+            // For this demo, we'll check if there's data in localStorage or use sample data
+            try {
+                const savedState = localStorage.getItem('boardRoomState');
+                if (savedState) {
+                    boardRoomState = JSON.parse(savedState);
+                    renderPage();
+                } else {
+                    // If no saved state, simulate API call with timeout
+                    setTimeout(function() {
+                        // Sample data for demonstration
+                        boardRoomState = getSampleData();
+                        renderPage();
+                    }, 2000);
+                }
+            } catch (error) {
+                console.error('Error loading state:', error);
+                showError();
+            }
+        }
+
+        // Render the page with current state
+        function renderPage() {
+            // Update question text
+            document.getElementById('question-text').textContent = boardRoomState.question;
+
+            if (boardRoomState.error) {
+                showError();
+                return;
+            }
+
+            if (boardRoomState.loading) {
+                document.getElementById('loading-container').style.display = 'flex';
+                document.getElementById('advisors-container').style.display = 'none';
+                return;
+            }
+
+            // Hide loading, show advisors
+            document.getElementById('loading-container').style.display = 'none';
+            document.getElementById('advisors-container').style.display = 'block';
+
+            // Render advisor cards
+            renderAdvisorCards();
+        }
+
+        // Render advisor cards based on state
+        function renderAdvisorCards() {
+            const advisorGrid = document.getElementById('advisor-grid');
+            advisorGrid.innerHTML = ''; // Clear existing cards
+
+            boardRoomState.advisorResponses.forEach(advisor => {
+                const card = createAdvisorCard(advisor);
+                advisorGrid.appendChild(card);
+            });
+        }
+
+        // Create a single advisor card element
+        function createAdvisorCard(advisor) {
+            const card = document.createElement('div');
+            card.className = 'advisor-card';
+
+            // Default avatar if none provided
+            const avatarUrl = advisor.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(advisor.name)}&background=random`;
+
+            card.innerHTML = `
+                <div class="card-header">
+                    <img class="advisor-avatar" src="${avatarUrl}" alt="${advisor.name}">
+                    <div class="advisor-info">
+                        <h3 class="advisor-name">${advisor.name}</h3>
+                        <p class="advisor-domain">${advisor.domain}</p>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="advisor-response">${formatResponse(advisor.response)}</div>
+                </div>
+                <div class="card-footer">
+                    <button class="card-button secondary-button" onclick="shareAdvisorResponse('${advisor.name}')">Share</button>
+                    <button class="card-button primary-button" onclick="requestFollowUp('${advisor.name}')">Request Follow-up</button>
+                </div>
+            `;
+
+            return card;
+        }
+
+        // Format the response text with paragraphs
+        function formatResponse(text) {
+            if (!text) return '';
+            return text.split('\n').map(para => para ? `<p>${para}</p>` : '<br>').join('');
+        }
+
+        // Navigation functions
+        function navigateBack() {
+            // In Factory, this would navigate back to the question page
+            // For demo, just go back in history
+            window.history.back();
+        }
+
+        function navigateToSummary() {
+            // In Factory, this would navigate to the Chief of Staff summary page
+            // For demo, we'll save state to localStorage and redirect
+            localStorage.setItem('boardRoomState', JSON.stringify(boardRoomState));
+            window.location.href = 'chief_of_staff_summary.html';
+        }
+
+        // Action functions
+        function shareAdvisorResponse(advisorName) {
+            const advisor = boardRoomState.advisorResponses.find(a => a.name === advisorName);
+            if (!advisor) return;
+
+            // In a real app, this would open a share dialog
+            alert(`Sharing ${advisorName}'s response:\n\n${advisor.response.substring(0, 100)}...`);
+        }
+
+        function requestFollowUp(advisorName) {
+            // In a real app, this would trigger a follow-up question flow
+            alert(`Requesting follow-up with ${advisorName}. This feature will be available soon.`);
+        }
+
+        // Error handling
+        function showError() {
+            document.getElementById('loading-container').style.display = 'none';
+            document.getElementById('advisors-container').style.display = 'none';
+            document.getElementById('error-container').style.display = 'block';
+        }
+
+        // Sample data generator for demo purposes
+        function getSampleData() {
+            return {
+                question: "Should we launch the Canadian vendor workflow fully automated, or start manual?",
+                loading: false,
+                error: false,
+                selectedAdvisors: ["Sundar Pichai", "Tope Awotona", "Pamela Maynard", "Arvind Krishna"],
+                advisorResponses: [
+                    {
+                        name: "Sundar Pichai",
+                        domain: "Strategy, Scale, Infrastructure",
+                        avatarUrl: "/images/advisors/sundar.png",
+                        response: "I recommend a phased rollout approach. Start with a limited automation pilot (30% of workflows) while maintaining manual oversight.\n\nBuild telemetry from day one - measure latency, error rates, and vendor satisfaction. Set clear KPIs for what 'success' looks like.\n\nOnce metrics show stability (error rates <2%, latency acceptable), expand automation coverage incrementally. This balances innovation speed with operational stability.\n\nThe key is instrumenting everything so you can make data-driven decisions about scaling up."
+                    },
+                    {
+                        name: "Tope Awotona",
+                        domain: "GTM Strategy, SaaS, Product-led Growth",
+                        avatarUrl: "/images/advisors/tope.png",
+                        response: "Launch with a hybrid approach - 70% automated with manual fallbacks.\n\nAs a bootstrapped founder, I learned that perfection is the enemy of progress. Your Canadian vendor workflow doesn't need to be flawless on day one.\n\nStart scrappy, validate core assumptions quickly, and avoid over-engineering. Watch for friction points in vendor onboarding - that's where automation typically breaks.\n\nSet a clear timeline (4-6 weeks) to evaluate and iterate. This keeps costs contained while giving you real-world feedback faster than any testing environment could."
+                    },
+                    {
+                        name: "Pamela Maynard",
+                        domain: "DEI, Culture, Enterprise Ops",
+                        avatarUrl: "/images/advisors/pamela.png",
+                        response: "Consider the change management implications first. Your frontline vendor-ops team needs to feel ownership in this transition.\n\nI recommend pairing your launch with clear communication and inclusive training. Without this, automation can be perceived as 'replacing people' rather than augmenting their capabilities.\n\nA phased approach with team involvement in defining success metrics will drive better adoption. Ensure your workflow accommodates diverse vendor needs and accessibility requirements.\n\nRemember that transformation is as much about people as it is about technology."
+                    },
+                    {
+                        name: "Arvind Krishna",
+                        domain: "Deep Tech, Hybrid Cloud, AI Ethics",
+                        avatarUrl: "/images/advisors/arvind.png",
+                        response: "For Canadian operations, I recommend maintaining manual verification checkpoints until compliance is fully validated.\n\nCanada has provincial data-residency rules and bilingual requirements that vary by region. An automated system must account for these nuances.\n\nImplement a hybrid approach with automated processing but human verification for decisions with regulatory implications. This creates an audit trail while you build confidence in the system.\n\nI suggest running a compliance audit alongside your initial deployment to identify any regulatory gaps before scaling to 100% automation."
+                    }
+                ],
+                synthesis: {
+                    summary: "All advisors support a phased or hybrid approach rather than immediate full automation. There's consensus on the need for real-time metrics and meeting Canadian regulatory standards.",
+                    keyInsights: [
+                        "Start with partial automation (30-70%) with manual oversight",
+                        "Build comprehensive telemetry from day one",
+                        "Address change management and team ownership",
+                        "Account for Canadian provincial regulations and bilingual requirements"
+                    ],
+                    recommendation: "Implement a 3-stage launch: (1) Pilot with 30% automation for 3 weeks, (2) Expand to 70% with regional data segregation for 5 weeks, (3) Move to 95%+ automation after compliance sign-off and sustained KPIs.",
+                    confidenceScore: 87,
+                    riskLevel: "Moderate"
+                }
+            };
+        }
+    </script>
+</body>
+</html>
